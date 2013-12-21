@@ -30,7 +30,7 @@ def minkowski_dist(user_ratings1, user_ratings2, r):
         if item_name in user_ratings2:
             # there is a matched item
             item_score_diff_r_sum += abs(user_ratings1[item_name] - user_ratings2[item_name]) ** r
-    return math.pow(item_score_diff_r_sum, 1.0/r)
+    return math.pow(item_score_diff_r_sum, 1.0 / r)
 
 
 def euclidean_dist(user_ratings1, user_ratings2):
@@ -69,6 +69,32 @@ def compute_nearest_neighbor(username, users_in):
     return distances
 
 
+def pearson(user_ratings1, user_ratings2):
+    """An approximation of Pearson Correlation"""
+    n = 0
+    # This actually could happen
+    # if vals1_len != vals2_len:
+    #     exit()
+
+    sum_of_products = 0.0
+    sum_of_user1 = 0.0
+    sum_of_user2 = 0.0
+    sum_of_user1_sqr = 0.0
+    sum_of_user2_sqr = 0.0
+
+    for k in user_ratings1:
+        if k in user_ratings2:
+            sum_of_products += user_ratings1[k] * user_ratings2[k]
+            sum_of_user1 += user_ratings1[k]
+            sum_of_user2 += user_ratings2[k]
+            sum_of_user1_sqr += user_ratings1[k] * user_ratings1[k]
+            sum_of_user2_sqr += user_ratings2[k] * user_ratings2[k]
+            n += 1
+
+    return (sum_of_products - sum_of_user1 * sum_of_user2 / n) / (
+        math.sqrt(sum_of_user1_sqr - sum_of_user1 * sum_of_user1 / n) *
+        math.sqrt(sum_of_user2_sqr - sum_of_user2 * sum_of_user2 / n))
+
 if __name__ == '__main__':
     print 'tesing...'
     # my_dict1 = {'a': 1, 'b': 2}
@@ -77,9 +103,16 @@ if __name__ == '__main__':
     #     print k
     # print type(my_dict1)
     # print type(my_dict1) == dict
-    print euclidean_dist(users['Hailey'], users['Veronica'])
-    print euclidean_dist(users['Hailey'], users['Jordyn'])
-    print manhattan_dist(users['Hailey'], users['Veronica'])
-    print manhattan_dist(users['Hailey'], users['Jordyn'])
-    print minkowski_dist(users['Hailey'], users['Veronica'], 4)
-    print compute_nearest_neighbor('Hailey', users)
+    # print euclidean_dist(users['Hailey'], users['Veronica'])
+    # print euclidean_dist(users['Hailey'], users['Jordyn'])
+    # print manhattan_dist(users['Hailey'], users['Veronica'])
+    # print manhattan_dist(users['Hailey'], users['Jordyn'])
+    # print minkowski_dist(users['Hailey'], users['Veronica'], 4)
+    # print compute_nearest_neighbor('Hailey', users)
+
+    # print users['Hailey'].values()
+    # print type(users['Hailey'].values())
+
+    print pearson(users['Angelica'], users['Bill'])
+    print pearson(users['Angelica'], users['Hailey'])
+    print pearson(users['Angelica'], users['Jordyn'])
