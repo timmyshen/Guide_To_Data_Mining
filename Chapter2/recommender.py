@@ -1,46 +1,43 @@
-import codecs 
+import codecs
 from math import sqrt
 
 users = {"Angelica": {"Blues Traveler": 3.5, "Broken Bells": 2.0,
                       "Norah Jones": 4.5, "Phoenix": 5.0,
                       "Slightly Stoopid": 1.5,
                       "The Strokes": 2.5, "Vampire Weekend": 2.0},
-         
-         "Bill":{"Blues Traveler": 2.0, "Broken Bells": 3.5,
-                 "Deadmau5": 4.0, "Phoenix": 2.0,
-                 "Slightly Stoopid": 3.5, "Vampire Weekend": 3.0},
-         
+
+         "Bill": {"Blues Traveler": 2.0, "Broken Bells": 3.5,
+                  "Deadmau5": 4.0, "Phoenix": 2.0,
+                  "Slightly Stoopid": 3.5, "Vampire Weekend": 3.0},
+
          "Chan": {"Blues Traveler": 5.0, "Broken Bells": 1.0,
                   "Deadmau5": 1.0, "Norah Jones": 3.0, "Phoenix": 5,
                   "Slightly Stoopid": 1.0},
-         
+
          "Dan": {"Blues Traveler": 3.0, "Broken Bells": 4.0,
                  "Deadmau5": 4.5, "Phoenix": 3.0,
                  "Slightly Stoopid": 4.5, "The Strokes": 4.0,
                  "Vampire Weekend": 2.0},
-         
+
          "Hailey": {"Broken Bells": 4.0, "Deadmau5": 1.0,
                     "Norah Jones": 4.0, "The Strokes": 4.0,
                     "Vampire Weekend": 1.0},
-         
-         "Jordyn":  {"Broken Bells": 4.5, "Deadmau5": 4.0,
-                     "Norah Jones": 5.0, "Phoenix": 5.0,
-                     "Slightly Stoopid": 4.5, "The Strokes": 4.0,
-                     "Vampire Weekend": 4.0},
-         
+
+         "Jordyn": {"Broken Bells": 4.5, "Deadmau5": 4.0,
+                    "Norah Jones": 5.0, "Phoenix": 5.0,
+                    "Slightly Stoopid": 4.5, "The Strokes": 4.0,
+                    "Vampire Weekend": 4.0},
+
          "Sam": {"Blues Traveler": 5.0, "Broken Bells": 2.0,
                  "Norah Jones": 3.0, "Phoenix": 5.0,
                  "Slightly Stoopid": 4.0, "The Strokes": 5.0},
-         
+
          "Veronica": {"Blues Traveler": 3.0, "Norah Jones": 5.0,
                       "Phoenix": 4.0, "Slightly Stoopid": 2.5,
-                      "The Strokes": 3.0}
-        }
+                      "The Strokes": 3.0}}
 
 
-
-class recommender:
-
+class Recommender:
     def __init__(self, data, k=1, metric='pearson', n=5):
         """ initialize recommender
         currently, if data is dictionary the recommender is initialized
@@ -58,39 +55,35 @@ class recommender:
         self.metric = metric
         if self.metric == 'pearson':
             self.fn = self.pearson
-        #
+            #
         # if data is dictionary set recommender data to it
         #
         if type(data).__name__ == 'dict':
             self.data = data
 
-    def convertProductID2name(self, id):
+    def convert_product_id_to_name(self, product_id):
         """Given product id number return product name"""
-        if id in self.productid2name:
-            return self.productid2name[id]
+        # productid2name is a dictionary
+        if product_id in self.productid2name:
+            return self.productid2name[product_id]
         else:
-            return id
+            return product_id
 
-
-    def userRatings(self, id, n):
+    def user_ratings(self, user_id, n):
         """Return n top ratings for user with id"""
-        print ("Ratings for " + self.userid2name[id])
-        ratings = self.data[id]
+        # userid2name is a dictionary
+        print ("Ratings for " + self.userid2name[user_id])
+        ratings = self.data[user_id]
         print(len(ratings))
         ratings = list(ratings.items())
-        ratings = [(self.convertProductID2name(k), v)
-                   for (k, v) in ratings]
+        ratings = [(self.convert_product_id_to_name(k), v) for (k, v) in ratings]
         # finally sort and return
-        ratings.sort(key=lambda artistTuple: artistTuple[1],
-                     reverse = True)
+        ratings.sort(key=lambda artist_tuple: artist_tuple[1], reverse=True)
         ratings = ratings[:n]
         for rating in ratings:
             print("%s\t%i" % (rating[0], rating[1]))
-        
 
-        
-
-    def loadBookDB(self, path=''):
+    def load_book_db(self, path=''):
         """loads the BX book dataset. Path is where the BX files are
         located"""
         self.data = {}
@@ -107,11 +100,11 @@ class recommender:
             book = fields[1].strip('"')
             rating = int(fields[2].strip().strip('"'))
             if user in self.data:
-                currentRatings = self.data[user]
+                currentratings = self.data[user]
             else:
-                currentRatings = {}
-            currentRatings[book] = rating
-            self.data[user] = currentRatings
+                currentratings = {}
+            currentratings[book] = rating
+            self.data[user] = currentratings
         f.close()
         #
         # Now load books into self.productid2name
@@ -152,9 +145,9 @@ class recommender:
             self.username2id[location] = userid
         f.close()
         print(i)
-                
-        
-    def pearson(self, rating1, rating2):
+
+    @staticmethod
+    def pearson(rating1, rating2):
         sum_xy = 0
         sum_x = 0
         sum_y = 0
@@ -173,7 +166,7 @@ class recommender:
                 sum_y2 += pow(y, 2)
         if n == 0:
             return 0
-        # now compute denominator
+            # now compute denominator
         denominator = (sqrt(sum_x2 - pow(sum_x, 2) / n)
                        * sqrt(sum_y2 - pow(sum_y, 2) / n))
         if denominator == 0:
@@ -181,8 +174,7 @@ class recommender:
         else:
             return (sum_xy - (sum_x * sum_y) / n) / denominator
 
-
-    def computeNearestNeighbor(self, username):
+    def compute_nearest_neighbor(self, username):
         """creates a sorted list of users based on their distance to
         username"""
         distances = []
@@ -191,52 +183,49 @@ class recommender:
                 distance = self.fn(self.data[username],
                                    self.data[instance])
                 distances.append((instance, distance))
-        # sort based on distance -- closest first
-        distances.sort(key=lambda artistTuple: artistTuple[1],
-                       reverse=True)
+                # sort based on distance -- closest first
+        distances.sort(key=lambda artisttuple: artisttuple[1], reverse=True)
         return distances
 
     def recommend(self, user):
-       """Give list of recommendations"""
-       recommendations = {}
-       # first get list of users  ordered by nearness
-       nearest = self.computeNearestNeighbor(user)
-       #
-       # now get the ratings for the user
-       #
-       userRatings = self.data[user]
-       #
-       # determine the total distance
-       totalDistance = 0.0
-       for i in range(self.k):
-          totalDistance += nearest[i][1]
-       # now iterate through the k nearest neighbors
-       # accumulating their ratings
-       for i in range(self.k):
-          # compute slice of pie 
-          weight = nearest[i][1] / totalDistance
-          # get the name of the person
-          name = nearest[i][0]
-          # get the ratings for this person
-          neighborRatings = self.data[name]
-          # get the name of the person
-          # now find bands neighbor rated that user didn't
-          for artist in neighborRatings:
-             if not artist in userRatings:
-                if artist not in recommendations:
-                   recommendations[artist] = (neighborRatings[artist]
-                                              * weight)
-                else:
-                   recommendations[artist] = (recommendations[artist]
-                                              + neighborRatings[artist]
-                                              * weight)
-       # now make list from dictionary
-       recommendations = list(recommendations.items())
-       recommendations = [(self.convertProductID2name(k), v)
-                          for (k, v) in recommendations]
-       # finally sort and return
-       recommendations.sort(key=lambda artistTuple: artistTuple[1],
-                            reverse = True)
-       # Return the first n items
-       return recommendations[:self.n]
-
+        """Give list of recommendations"""
+        recommendations = {}
+        # first get list of users  ordered by nearness
+        nearest = self.compute_nearest_neighbor(user)
+        #
+        # now get the ratings for the user
+        #
+        userratings = self.data[user]
+        #
+        # determine the total distance
+        totaldistance = 0.0
+        for i in range(self.k):
+            totaldistance += nearest[i][1]
+            # now iterate through the k nearest neighbors
+        # accumulating their ratings
+        for i in range(self.k):
+            # compute slice of pie
+            weight = nearest[i][1] / totaldistance
+            # get the name of the person
+            name = nearest[i][0]
+            # get the ratings for this person
+            neighborratings = self.data[name]
+            # get the name of the person
+            # now find bands neighbor rated that user didn't
+            for artist in neighborratings:
+                if not artist in userratings:
+                    if artist not in recommendations:
+                        recommendations[artist] = (neighborratings[artist]
+                                                   * weight)
+                    else:
+                        recommendations[artist] = (recommendations[artist]
+                                                   + neighborratings[artist]
+                                                   * weight)
+                        # now make list from dictionary
+        recommendations = list(recommendations.items())
+        recommendations = [(self.convert_product_id_to_name(k), v)
+                           for (k, v) in recommendations]
+        # finally sort and return
+        recommendations.sort(key=lambda artisttuple: artisttuple[1], reverse=True)
+        # Return the first n items
+        return recommendations[:self.n]
